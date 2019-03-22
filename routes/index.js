@@ -6,7 +6,12 @@ var crypto = require('crypto'),
 
 /* GET home page. */
 router.get('/', function (req, res) {
-	Post.get(req.session.user.name, function (err, posts) {
+	// 检测登录
+	var username = null;
+	if (req.session.user) {
+	    username = req.session.user.name;
+  	}
+	Post.get(username, function (err, posts) {
 	    if (err) {
 	    	console.log(err);
 	      posts = [];
@@ -86,16 +91,17 @@ router.post('/login', checkNotLogin);
 router.post('/login', function (req, res) {
 	var md5 = crypto.createHash('md5'),
     password = md5.update(req.body.password).digest('hex');
+
     User.get(req.body.name, function (err, user) {
-      if (!user) {
+      if (+user==0) {
         req.flash('error', '用户不存在!'); 
         return res.redirect('/login');
       }
-      if (user.password != password) {
+      if (user[0].password != password) {
         req.flash('error', '密码错误!'); 
         return res.redirect('/login');
       }
-      req.session.user = user;
+      req.session.user = user[0];
       req.flash('success', '登陆成功!');
       res.redirect('/');
     });
