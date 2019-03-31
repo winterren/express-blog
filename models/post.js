@@ -1,4 +1,5 @@
 var mongodb = require('./db');
+var markdown = require('markdown').markdown;
 
 function Post(name, title, post) {
   this.name = name;
@@ -92,6 +93,10 @@ Post.get = function(name, callback) {
           return callback(err);
         }
         console.log(result);
+        //解析 markdown 为 html
+        result.forEach(function (doc) {
+          doc.post = markdown.toHTML(doc.post);
+        });
         callback(null, result);//成功！返回查询的文档
     });
     db.close();
